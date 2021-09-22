@@ -31,7 +31,7 @@ class Pinezka_Ak_Activator
 CREATE TABLE IF NOT EXISTS `pinezka_ak_team` (
     ID BIGINT(20) UNSIGNED PRIMARY KEY AUTO_INCREMENT,
     leader_id BIGINT(20) UNSIGNED NOT NULL,
-    name VARCHAR(60) NOT NULL
+    name VARCHAR(255) NOT NULL
 ) $charset_collate;\n");
         dbDelta("
 CREATE TABLE IF NOT EXISTS `pinezka_ak_team_member` (
@@ -43,13 +43,13 @@ CREATE TABLE IF NOT EXISTS `pinezka_ak_team_member` (
 CREATE TABLE IF NOT EXISTS `pinezka_ak_markers` (
     ID BIGINT(20) UNSIGNED PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT(20) UNSIGNED NOT NULL,
-    name VARCHAR(60) NOT NULL,
-    description VARCHAR(255),
-    coordinates VARCHAR(20),
+    name VARCHAR(255) NOT NULL,
+    description VARCHAR(1000),
+    coordinates VARCHAR(40),
     type VARCHAR(30),
-    city VARCHAR(60),
-    region VARCHAR(60),
-    image BLOB
+    city VARCHAR(255),
+    region VARCHAR(255),
+    image VARCHAR(30)
 ) $charset_collate;\n");
     }
 }

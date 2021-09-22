@@ -58,8 +58,8 @@
                     </label>
                 </th>
                 <td>
-                    <textarea class="textarea-wrap" name="description" id="description"
-                              maxlength="255"><?= esc_attr($new_marker_description); ?></textarea>
+                    <textarea class="textarea-wrap" name="description" id="description" rows="10"
+                              maxlength="1000"><?= esc_attr($new_marker_description); ?></textarea>
                 </td>
             </tr>
             <tr class="form-field">
@@ -81,7 +81,7 @@
                 </th>
                 <td>
                     <input name="city" type="text" id="city" value="<?= esc_attr($new_marker_city); ?>"
-                           maxlength="60" />
+                           maxlength="255" />
                 </td>
             </tr>
             <tr class="form-field">
@@ -92,7 +92,7 @@
                 </th>
                 <td>
                     <input name="region" type="text" id="region" value="<?= esc_attr($new_marker_region); ?>"
-                           maxlength="60" />
+                           maxlength="255" />
                 </td>
             </tr>
             <tr class="form-field">

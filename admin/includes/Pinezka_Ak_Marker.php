@@ -90,7 +90,7 @@ class Pinezka_Ak_Marker
             }
         }
 
-        $wpdb->insert(PINEZKA_AK_MARKERS_TABLE, wp_unslash([
+        $rows = $wpdb->insert(PINEZKA_AK_MARKERS_TABLE, wp_unslash([
             'user_id' => get_current_user_id(),
             'name' => $this->name,
             'description' => $this->description,
@@ -100,6 +100,11 @@ class Pinezka_Ak_Marker
             'region' => $this->region,
             'image' => $image_attachment_id ?? ''
         ]));
+
+        if ($rows == false) {
+            return new WP_Error('db_error', 'Nie udało się stworzyć pinezki. Spróbuj ponownie lub skontaktuj się z nami!');
+        }
+
         $this->user_id = get_current_user_id();
         $this->ID = $wpdb->insert_id;
 
@@ -138,6 +143,10 @@ class Pinezka_Ak_Marker
         ]), [
             'ID' => strval($this->ID)
         ]);
+
+        if ($rows == false) {
+            return new WP_Error('db_error', 'Nie udało się zaktualizować pinezki. Spróbuj ponownie lub skontaktuj się z nami!');
+        }
 
         return $this;
     }
