@@ -55,7 +55,7 @@ $readonly = !$editing ? 'readonly' : '';
                 </th>
                 <td>
                     <input name="name" type="text" id="name" value="<?= $marker->get_name(); ?>"
-                           <?= $readonly ?> aria-required="true" maxlength="60" />
+                           <?= $readonly ?> aria-required="true" maxlength="255" />
                 </td>
             </tr>
             <tr class="form-field">
@@ -65,7 +65,7 @@ $readonly = !$editing ? 'readonly' : '';
                     </label>
                 </th>
                 <td>
-                    <textarea class="textarea-wrap" name="description" id="description" maxlength="255"
+                    <textarea class="textarea-wrap" name="description" id="description" maxlength="1000" rows="10"
                               <?= $readonly ?>><?= $marker->get_description(); ?></textarea>
                 </td>
             </tr>
@@ -78,6 +78,8 @@ $readonly = !$editing ? 'readonly' : '';
                 <td>
                     <div id="marker-location-map" style="height: 400px; width: 95%;"></div>
                     <?php if ($editing): ?>
+                        <br />
+                        <a id="marker-get-location-button" class="button">Pobierz aktualną lokalizację</a>
                         <input name="coordinates" type="hidden" id="coordinates"
                                value="<?= $marker->get_coordinates() ?>" />
                     <?php endif; ?>
@@ -91,7 +93,7 @@ $readonly = !$editing ? 'readonly' : '';
                 </th>
                 <td>
                     <input name="city" type="text" id="city" value="<?= $marker->get_city(); ?>"
-                        <?= $readonly ?> maxlength="60" />
+                        <?= $readonly ?> maxlength="255" />
                 </td>
             </tr>
             <tr class="form-field">
@@ -102,7 +104,7 @@ $readonly = !$editing ? 'readonly' : '';
                 </th>
                 <td>
                     <input name="region" type="text" id="region" value="<?= $marker->get_region(); ?>"
-                        <?= $readonly ?> maxlength="60" />
+                        <?= $readonly ?> maxlength="255" />
                 </td>
             </tr>
             <tr class="form-field">
@@ -138,6 +140,7 @@ $readonly = !$editing ? 'readonly' : '';
                         <img src="<?= wp_get_attachment_url($marker->get_image()); ?>" alt="Marker image" style="max-height: 400px; max-width: 95%;" />
                     <?php endif; ?>
                     <?php if ($editing): ?>
+                        <br />
                         <input name="marker-image" type="file" id="image" accept="image/png, image/jpeg" />
                     <?php endif; ?>
                 </td>
@@ -177,5 +180,30 @@ $readonly = !$editing ? 'readonly' : '';
             isMarkerAdded = true;
         }
     });
+    jQuery('#marker-get-location-button').on('click', function () {
+        if (navigator.geolocation) {
+            const $self = jQuery(this);
+            $self.toggleClass('disabled').text('Pobieram lokalizację...');
+            navigator.geolocation.getCurrentPosition(function (position) {
+                $self.toggleClass('disabled').text('Pobierz aktualną lokalizację');
+                const { latitude, longitude } = position.coords;
+                marker.setLatLng({
+                    lat: latitude,
+                    lng: longitude,
+                });
+                jQuery('#coordinates').val(latitude + ',' + longitude);
+                map.setView([latitude, longitude], 15);
+
+                if (!isMarkerAdded) {
+                    marker.addTo(map);
+                    isMarkerAdded = true;
+                }
+            }, null, {
+                enableHighAccuracy: true
+            });
+        } else {
+            jQuery(this).addClass('disabled').text('Twoja przeglądarka nie wspiera geolokalizacji.');
+        }
+    })
     <?php endif; ?>
 </script>

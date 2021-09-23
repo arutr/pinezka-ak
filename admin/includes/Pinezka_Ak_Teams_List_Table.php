@@ -16,6 +16,8 @@ class Pinezka_Ak_Teams_List_Table extends WP_List_Table
     public function __construct()
     {
         parent::__construct([
+            'singular' => 'Zespół',
+            'plural' => 'Zespoły',
             'ajax' => false,
         ]);
     }
@@ -40,7 +42,7 @@ class Pinezka_Ak_Teams_List_Table extends WP_List_Table
      *
      * @return string|void
      */
-    protected function column_join_team($item)
+    protected function column_action($item)
     {
         if (!Pinezka_Ak_Team::is_user_in_team(get_current_user_id())) {
             $url = add_query_arg(
@@ -141,7 +143,7 @@ AND TeamMember.team_id = {$item['ID']};", ARRAY_N);
 
         $columns = $this->get_columns();
         $columns['score'] = 'Punkty';
-        $columns['join_team'] = '';
+        $columns['action'] = '';
         $hidden = [];
         $sortable = $this->get_sortable_columns();
         $this->_column_headers = [$columns, $hidden, $sortable];

@@ -48,7 +48,7 @@
                 </th>
                 <td>
                     <input name="name" type="text" id="name" value="<?= esc_attr($new_marker_name); ?>"
-                           aria-required="true" maxlength="60" />
+                           aria-required="true" maxlength="255" />
                 </td>
             </tr>
             <tr class="form-field">
@@ -70,6 +70,8 @@
                 </th>
                 <td>
                     <div id="marker-location-map" style="height: 400px; width: 95%;"></div>
+                    <br />
+                    <a id="marker-get-location-button" class="button">Pobierz aktualną lokalizację</a>
                     <input name="coordinates" type="hidden" id="coordinates" />
                 </td>
             </tr>
@@ -141,4 +143,29 @@
             isMarkerAdded = true;
         }
     });
+    jQuery('#marker-get-location-button').on('click', function () {
+        if (navigator.geolocation) {
+            const $self = jQuery(this);
+            $self.toggleClass('disabled').text('Pobieram lokalizację...');
+            navigator.geolocation.getCurrentPosition(function (position) {
+                $self.toggleClass('disabled').text('Pobierz aktualną lokalizację');
+                const { latitude, longitude } = position.coords;
+                marker.setLatLng({
+                    lat: latitude,
+                    lng: longitude,
+                });
+                jQuery('#coordinates').val(latitude + ',' + longitude);
+                map.setView([latitude, longitude], 15);
+
+                if (!isMarkerAdded) {
+                    marker.addTo(map);
+                    isMarkerAdded = true;
+                }
+            }, null, {
+                enableHighAccuracy: true
+            });
+        } else {
+            jQuery(this).addClass('disabled').text('Twoja przeglądarka nie wspiera geolokalizacji.');
+        }
+    })
 </script>
