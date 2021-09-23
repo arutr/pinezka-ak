@@ -56,10 +56,15 @@ class Pinezka_Ak_Team
             return new WP_Error('user_is_in_team', 'Uczestnik należy już do zespołu.');
         }
 
-        $wpdb->insert(PINEZKA_AK_TEAM_TABLE, wp_unslash([
+        $rows = $wpdb->insert(PINEZKA_AK_TEAM_TABLE, wp_unslash([
             'name'      => $this->name,
             'leader_id' => $this->leader_id
         ]));
+
+        if ($rows == false) {
+            return new WP_Error('db_error', 'Nie udało się stworzyć zespołu. Spróbuj ponownie lub skontaktuj się z nami!');
+        }
+
         $this->ID = $wpdb->insert_id;
 
         $this->add_team_member(get_current_user_id());
@@ -78,11 +83,15 @@ class Pinezka_Ak_Team
             return new WP_Error('empty_name', 'Nazwa zespołu jest wymagana.');
         }
 
-        $wpdb->update(PINEZKA_AK_TEAM_TABLE, wp_unslash([
+        $rows = $wpdb->update(PINEZKA_AK_TEAM_TABLE, wp_unslash([
             'name'  => $this->name,
         ]), [
             'ID' => strval($this->ID),
         ]);
+
+        if ($rows == false) {
+            return new WP_Error('db_error', 'Nie udało się zaktualizować zespołu. Spróbuj ponownie lub skontaktuj się z nami!');
+        }
 
         return $this;
     }

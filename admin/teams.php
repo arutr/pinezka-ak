@@ -17,12 +17,12 @@ if (isset($_REQUEST['action'])) {
                 wp_die($result);
             }
 
-            $success = 'Dołączyłeś do zespołu ' . $team->get_name() . '!';
+            $success = 'Jesteś w zespole ' . $team->get_name() . '!';
         }
     } else if ($_REQUEST['action'] === 'leave_team') {
         if (Pinezka_Ak_Team::is_user_in_team(get_current_user_id())) {
             Pinezka_Ak_Team::leave_team();
-            $success = 'Opuściłeś swój zespół.';
+            $success = 'Nie należysz już do zespołu.';
         }
     }
 }

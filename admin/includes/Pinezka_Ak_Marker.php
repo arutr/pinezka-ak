@@ -83,14 +83,14 @@ class Pinezka_Ak_Marker
         }
 
         if ($_FILES['marker-image']['size']) {
-            $image_attachment_id = media_handle_upload($this->image, 0);
+            $image_attachment_id = media_handle_upload('marker-image', 0);
 
             if (is_wp_error($image_attachment_id)) {
                 return $image_attachment_id;
             }
         }
 
-        $wpdb->insert(PINEZKA_AK_MARKERS_TABLE, wp_unslash([
+        $rows = $wpdb->insert(PINEZKA_AK_MARKERS_TABLE, wp_unslash([
             'user_id' => get_current_user_id(),
             'name' => $this->name,
             'description' => $this->description,
@@ -100,6 +100,11 @@ class Pinezka_Ak_Marker
             'region' => $this->region,
             'image' => $image_attachment_id ?? ''
         ]));
+
+        if ($rows == false) {
+            return new WP_Error('db_error', 'Nie udało się stworzyć pinezki. Spróbuj ponownie lub skontaktuj się z nami!');
+        }
+
         $this->user_id = get_current_user_id();
         $this->ID = $wpdb->insert_id;
 
@@ -139,7 +144,29 @@ class Pinezka_Ak_Marker
             'ID' => strval($this->ID)
         ]);
 
+        if ($rows == false) {
+            return new WP_Error('db_error', 'Nie udało się zaktualizować pinezki. Spróbuj ponownie lub skontaktuj się z nami!');
+        }
+
         return $this;
+    }
+
+    /**
+     * @return bool|WP_Error
+     */
+    public function delete()
+    {
+        global $wpdb;
+
+        $rows = $wpdb->delete(PINEZKA_AK_MARKERS_TABLE, [
+            'ID' => $this->ID
+        ]);
+
+        if ($rows == false) {
+            return new WP_Error('db_error', 'Nie udało się skasować pinezki. Spróbuj ponownie lub skontaktuj się z nami!');
+        }
+
+        return true;
     }
 
     /**
@@ -220,7 +247,7 @@ class Pinezka_Ak_Marker
     public static function get_types(): array
     {
         return [
-            'grave'             => 'Mogiła',
+            'grave'             => 'Mogiła / Grób',
             'statue'            => 'Pomnik',
             'exterior_memorial' => 'Tablica pamiątkowa na zewnątrz',
             'interior_memorial' => 'Tablica pamiątkowa wewnątrz',

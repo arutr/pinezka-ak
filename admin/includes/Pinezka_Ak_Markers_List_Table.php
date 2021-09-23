@@ -16,6 +16,8 @@ class Pinezka_Ak_Markers_List_Table extends WP_List_Table
     public function __construct()
     {
         parent::__construct([
+            'singular' => 'Pinezka',
+            'plural' => 'Pinezki',
             'ajax' => false,
         ]);
     }
@@ -35,6 +37,23 @@ class Pinezka_Ak_Markers_List_Table extends WP_List_Table
                 return $item[$column_name];
             default:
                 return '';
+        }
+    }
+
+    /**
+     * @param $item
+     *
+     * @return string|void
+     */
+    protected function column_action($item)
+    {
+        if ($item['user_id'] == get_current_user_id()) {
+            $url = add_query_arg(
+                ['action' => 'delete_marker', 'id' => $item['ID']],
+                menu_page_url('markers', false)
+            );
+
+            return '<a href="' . $url .'"><strong>Usuń</strong></a>';
         }
     }
 
@@ -79,7 +98,7 @@ class Pinezka_Ak_Markers_List_Table extends WP_List_Table
     {
         return [
             'name'    => __('Name'),
-            'ID'      => __('ID'),
+            'ID'      => 'Nr',
             'user_id' => __('Author'),
             'type'    => __('Type'),
             'city'    => __('City'),
@@ -99,6 +118,39 @@ class Pinezka_Ak_Markers_List_Table extends WP_List_Table
             'city'   => ['city', false],
             'region' => ['region', false],
         ];
+    }
+
+    /**
+     * @return array
+     */
+    protected function get_views()
+    {
+        $views = [
+            '' => __('All'),
+            'mine' => 'Moje'
+        ];
+
+        array_walk($views, function (&$view, $class) {
+            $html = '<a href="' . add_query_arg('type', $class) . '"';
+
+            if ((empty($_REQUEST['type']) && empty($class)) ||
+                (!empty($_REQUEST['type']) && $_REQUEST['type'] == $class)) {
+                $html .= ' class="current"';
+            }
+
+            $html .= '>' . $view . '</a>';
+            $view = $html;
+        });
+
+        return $views;
+    }
+
+    /**
+     * @return string
+     */
+    public function no_items(): string
+    {
+        return 'Nikt nie dodał jeszcze pinezki. Bądź pierwszy i dodaj pinezkę!';
     }
 
     /**
@@ -124,12 +176,19 @@ class Pinezka_Ak_Markers_List_Table extends WP_List_Table
             $search = "AND name LIKE '%" . esc_sql($wpdb->esc_like($_REQUEST['s'])) . "%'";
         }
 
+        $type = '';
+
+        if (!empty($_REQUEST['type']) && $_REQUEST['type'] == 'mine') {
+            $type = 'AND user_id = ' . get_current_user_id() . ' ';
+        }
+
         $column_keys = join(',', array_keys($this->get_columns()));
-        $sql = "SELECT $column_keys FROM pinezka_ak_markers WHERE 1=1 $search"
+        $sql = "SELECT $column_keys FROM pinezka_ak_markers WHERE 1=1 $search $type"
                . $wpdb->prepare("ORDER BY id DESC LIMIT %d OFFSET %d;", $per_page, $offset);
         $items = $wpdb->get_results($sql, ARRAY_A);
 
         $columns = $this->get_columns();
+        $columns['action'] = '';
         $hidden = [];
         $sortable = $this->get_sortable_columns();
         $this->_column_headers = [$columns, $hidden, $sortable];

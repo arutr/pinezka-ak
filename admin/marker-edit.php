@@ -49,9 +49,9 @@ if (isset($_REQUEST['action'])) {
 
         if (is_wp_error($updated_marker)) {
             $errors = $updated_marker;
+        } else {
+            $success = 'Pinezka zaktualizowana.';
         }
-
-        $success = 'Pinezka zaktualizowana.';
 
         require_once __DIR__ . '/marker-view.php';
     }

@@ -48,7 +48,7 @@
                 </th>
                 <td>
                     <input name="name" type="text" id="name" value="<?= esc_attr($new_marker_name); ?>"
-                           aria-required="true" maxlength="60" />
+                           aria-required="true" maxlength="255" />
                 </td>
             </tr>
             <tr class="form-field">
@@ -58,8 +58,8 @@
                     </label>
                 </th>
                 <td>
-                    <textarea class="textarea-wrap" name="description" id="description"
-                              maxlength="255"><?= esc_attr($new_marker_description); ?></textarea>
+                    <textarea class="textarea-wrap" name="description" id="description" rows="10"
+                              maxlength="1000"><?= esc_attr($new_marker_description); ?></textarea>
                 </td>
             </tr>
             <tr class="form-field">
@@ -70,6 +70,8 @@
                 </th>
                 <td>
                     <div id="marker-location-map" style="height: 400px; width: 95%;"></div>
+                    <br />
+                    <a id="marker-get-location-button" class="button">Pobierz aktualną lokalizację</a>
                     <input name="coordinates" type="hidden" id="coordinates" />
                 </td>
             </tr>
@@ -81,7 +83,7 @@
                 </th>
                 <td>
                     <input name="city" type="text" id="city" value="<?= esc_attr($new_marker_city); ?>"
-                           maxlength="60" />
+                           maxlength="255" />
                 </td>
             </tr>
             <tr class="form-field">
@@ -92,7 +94,7 @@
                 </th>
                 <td>
                     <input name="region" type="text" id="region" value="<?= esc_attr($new_marker_region); ?>"
-                           maxlength="60" />
+                           maxlength="255" />
                 </td>
             </tr>
             <tr class="form-field">
@@ -141,4 +143,29 @@
             isMarkerAdded = true;
         }
     });
+    jQuery('#marker-get-location-button').on('click', function () {
+        if (navigator.geolocation) {
+            const $self = jQuery(this);
+            $self.toggleClass('disabled').text('Pobieram lokalizację...');
+            navigator.geolocation.getCurrentPosition(function (position) {
+                $self.toggleClass('disabled').text('Pobierz aktualną lokalizację');
+                const { latitude, longitude } = position.coords;
+                marker.setLatLng({
+                    lat: latitude,
+                    lng: longitude,
+                });
+                jQuery('#coordinates').val(latitude + ',' + longitude);
+                map.setView([latitude, longitude], 15);
+
+                if (!isMarkerAdded) {
+                    marker.addTo(map);
+                    isMarkerAdded = true;
+                }
+            }, null, {
+                enableHighAccuracy: true
+            });
+        } else {
+            jQuery(this).addClass('disabled').text('Twoja przeglądarka nie wspiera geolokalizacji.');
+        }
+    })
 </script>
