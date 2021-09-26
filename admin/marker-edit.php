@@ -7,6 +7,14 @@ if (isset($_REQUEST['action'])) {
     if ($_REQUEST['action'] === 'createmarker') {
         check_admin_referer('create-marker', '_wpnonce_create-marker');
 
+        if (!isset($_POST['agreement_copyright'], $_POST['agreement_tc'])) {
+            $errors = new WP_Error('missing_agreement', 'Wymagane jest zaakceptowanie oświadczeń.');
+
+            require_once __DIR__ . '/marker-new.php';
+
+            return;
+        }
+
         $marker = new Pinezka_Ak_Marker();
         $marker->set_name(sanitize_text_field($_POST['name']));
         $marker->set_description(sanitize_textarea_field($_POST['description']));
@@ -45,6 +53,11 @@ if (isset($_REQUEST['action'])) {
         $marker->set_type(sanitize_text_field($_POST['type']));
         $marker->set_city(sanitize_text_field($_POST['city']));
         $marker->set_region(sanitize_text_field($_POST['region']));
+
+        if (isset($_POST['points_criteria']) && current_user_can('edit_users')) {
+            $marker->set_points_criteria(sanitize_text_field($_POST['points_criteria']));
+        }
+
         $updated_marker = $marker->update();
 
         if (is_wp_error($updated_marker)) {

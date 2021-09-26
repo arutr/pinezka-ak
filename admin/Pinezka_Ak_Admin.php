@@ -81,24 +81,64 @@ class Pinezka_Ak_Admin
             [&$this, 'get_marker_edit_page_content']
         );
 
-        // Teams
-        add_menu_page(
-            'Zespoły',
-            'Zespoły',
-            'read',
-            self::MENU_SLUG_TEAMS,
-            [&$this, 'get_teams_page_content'],
-            'dashicons-groups',
-            27
-        );
+        if (get_option('pinezka_ak_enable_teams') || current_user_can('edit_users')) {
+            // Teams
+            add_menu_page(
+                'Zespoły',
+                'Zespoły',
+                'read',
+                self::MENU_SLUG_TEAMS,
+                [&$this, 'get_teams_page_content'],
+                'dashicons-groups',
+                27
+            );
+            add_submenu_page(
+                self::MENU_SLUG_TEAMS,
+                'Zespół',
+                'Dodaj nowy',
+                'read',
+                'team-edit',
+                [&$this, 'get_team_edit_page_content']
+            );
+        }
         add_submenu_page(
             self::MENU_SLUG_TEAMS,
-            'Zespół',
-            'Dodaj nowy',
-            'read',
-            'team-edit',
-            [&$this, 'get_team_edit_page_content']
+            'Ustawienia zespołów',
+            'Ustawienia',
+            'edit_users',
+            'team-settings',
+            [&$this, 'get_team_settings_page_content']
         );
+    }
+
+    /**
+     * Initialise team settings.
+     */
+    public function init_team_settings()
+    {
+        add_settings_section(
+            'pinezka_ak_team_settings',
+            'Ogólne',
+            null,
+            'team-settings'
+        );
+
+        add_settings_field(
+            'pinezka_ak_enable_teams',
+            'Włącz zespoły dla uczestników',
+            [&$this, 'get_enable_teams_setting_field'],
+            'team-settings',
+            'pinezka_ak_team_settings'
+        );
+        register_setting('team-settings', 'pinezka_ak_enable_teams');
+    }
+
+    public function get_enable_teams_setting_field()
+    {
+        ?>
+        <label for="pinezka_ak_enable_teams"></label>
+        <input type="checkbox" id="pinezka_ak_enable_teams" name="pinezka_ak_enable_teams" value="1" <?php checked(1, get_option('pinezka_ak_enable_teams')); ?>>
+        <?php
     }
 
     /**
@@ -115,6 +155,11 @@ class Pinezka_Ak_Admin
     public function get_marker_edit_page_content()
     {
         include_once dirname(__FILE__) . '/marker-edit.php';
+    }
+
+    public function get_team_settings_page_content()
+    {
+        include_once dirname(__FILE__) . '/team-settings.php';
     }
 
     /**
