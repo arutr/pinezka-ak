@@ -10,7 +10,7 @@ if (isset($_REQUEST['action'])) {
             wp_die($marker);
         }
 
-        if ($marker->get_user_id() != get_current_user_id()) {
+        if ($marker->get_user_id() != get_current_user_id() && !current_user_can('delete_users')) {
             wp_die();
         }
 

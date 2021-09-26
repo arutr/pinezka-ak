@@ -47,7 +47,7 @@ class Pinezka_Ak_Markers_List_Table extends WP_List_Table
      */
     protected function column_action($item)
     {
-        if ($item['user_id'] == get_current_user_id()) {
+        if ($item['user_id'] == get_current_user_id() || current_user_can('delete_users')) {
             $url = add_query_arg(
                 ['action' => 'delete_marker', 'id' => $item['ID']],
                 menu_page_url('markers', false)
@@ -143,14 +143,6 @@ class Pinezka_Ak_Markers_List_Table extends WP_List_Table
         });
 
         return $views;
-    }
-
-    /**
-     * @return string
-     */
-    public function no_items(): string
-    {
-        return 'Nikt nie dodał jeszcze pinezki. Bądź pierwszy i dodaj pinezkę!';
     }
 
     /**

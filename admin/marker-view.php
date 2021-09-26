@@ -40,170 +40,35 @@ $readonly = !$editing ? 'readonly' : '';
     <div id="ajax-response"></div>
     <form method="post" name="editmarker" id="editmarker" class="validate" novalidate="novalidate"
           enctype="multipart/form-data">
+        <?php if (!isset($_REQUEST['id'])): ?>
+            <input type="hidden" name="id" value="<?= $marker->get_id(); ?>" />
+        <?php endif; ?>
         <?php if ($editing): ?>
             <input name="action" type="hidden" value="editmarker" />
             <?php wp_nonce_field('edit-marker', '_wpnonce_edit-marker'); ?>
         <?php endif; ?>
-
         <table class="form-table" role="presentation">
-            <tr class="form-field form-required">
-                <th scope="row">
-                    <label for="name">
-                        <?= __('Name'); ?>
-                        <span class="description"><?= __('(required)'); ?></span>
-                    </label>
-                </th>
-                <td>
-                    <input name="name" type="text" id="name" value="<?= $marker->get_name(); ?>"
-                           <?= $readonly ?> aria-required="true" maxlength="255" />
-                </td>
-            </tr>
-            <tr class="form-field">
-                <th scope="row">
-                    <label for="description">
-                        <?= __('Description'); ?>
-                    </label>
-                </th>
-                <td>
-                    <textarea class="textarea-wrap" name="description" id="description" maxlength="1000" rows="10"
-                              <?= $readonly ?>><?= $marker->get_description(); ?></textarea>
-                </td>
-            </tr>
-            <tr class="form-field">
-                <th scope="row">
-                    <label for="coordinates">
-                        Miejsce pinezki
-                    </label>
-                </th>
-                <td>
-                    <div id="marker-location-map" style="height: 400px; width: 95%;"></div>
-                    <?php if ($editing): ?>
-                        <br />
-                        <a id="marker-get-location-button" class="button">Pobierz aktualną lokalizację</a>
-                        <input name="coordinates" type="hidden" id="coordinates"
-                               value="<?= $marker->get_coordinates() ?>" />
-                    <?php endif; ?>
-                </td>
-            </tr>
-            <tr class="form-field">
-                <th scope="row">
-                    <label for="city">
-                        <?= __('City'); ?>
-                    </label>
-                </th>
-                <td>
-                    <input name="city" type="text" id="city" value="<?= $marker->get_city(); ?>"
-                        <?= $readonly ?> maxlength="255" />
-                </td>
-            </tr>
-            <tr class="form-field">
-                <th scope="row">
-                    <label for="region">
-                        Województwo
-                    </label>
-                </th>
-                <td>
-                    <input name="region" type="text" id="region" value="<?= $marker->get_region(); ?>"
-                        <?= $readonly ?> maxlength="255" />
-                </td>
-            </tr>
-            <tr class="form-field">
-                <th scope="row">
-                    <label for="type">
-                        Rodzaj
-                    </label>
-                </th>
-                <td>
-                    <select name="type" id="type" <?= !$editing ? 'disabled' : '' ?>>
-                        <?php if ($editing): ?>
-                            <option value="">--- Wybierz rodzaj pinezki ---</option>
-                            <?php foreach (Pinezka_Ak_Marker::get_types() as $value => $label): ?>
-                                <option value="<?= $value ?>"
-                                    <?= $marker->get_type() == $value ? 'selected' : '' ?>>
-                                    <?= $label ?>
-                                </option>
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <option value="<?= $marker->get_type(); ?>"><?= Pinezka_Ak_Marker::get_type_label($marker->get_type()); ?></option>
-                        <?php endif; ?>
-                    </select>
-                </td>
-            </tr>
-            <tr class="form-field">
-                <th scope="row">
-                    <label for="image">
-                        <?= __('Image'); ?>
-                    </label>
-                </th>
-                <td>
-                    <?php if ($marker->get_image()): ?>
-                        <img src="<?= wp_get_attachment_url($marker->get_image()); ?>" alt="Marker image" style="max-height: 400px; max-width: 95%;" />
-                    <?php endif; ?>
-                    <?php if ($editing): ?>
-                        <br />
-                        <input name="marker-image" type="file" id="image" accept="image/png, image/jpeg" />
-                    <?php endif; ?>
-                </td>
-            </tr>
+            <?php Pinezka_Ak_Marker::get_name_form_html($marker->get_name(), $editing); ?>
+            <?php Pinezka_Ak_Marker::get_description_form_html($marker->get_description(), $editing); ?>
+            <?php Pinezka_Ak_Marker::get_coordinates_form_html($marker->get_coordinates(), $editing); ?>
+            <?php Pinezka_Ak_Marker::get_city_form_html($marker->get_city(), $editing); ?>
+            <?php Pinezka_Ak_Marker::get_region_form_html($marker->get_region(), $editing); ?>
+            <?php Pinezka_Ak_Marker::get_type_form_html($marker->get_type(), $editing); ?>
+            <?php Pinezka_Ak_Marker::get_image_form_html($marker->get_image(), $editing); ?>
+            <?php if (current_user_can('edit_users')): ?>
+                <?php Pinezka_Ak_Marker::get_points_criteria_form_html($marker->get_points_criteria()); ?>
+            <?php endif; ?>
         </table>
         <?php if ($editing): ?>
-            <?php submit_button('Aktualizuj pinezkę', 'primary', 'editmarker', true, ['id' => 'editmarkersub']); ?>
+            <?php submit_button(
+                    'Aktualizuj pinezkę',
+                    'primary',
+                    'editmarker',
+                    true,
+                    ['id' => 'editmarkersub']);
+            ?>
         <?php endif; ?>
     </form>
 </div>
-<script>
-    <?php
-    $defaultLatLng = '';
-
-    if ($marker->get_coordinates()) {
-        $defaultLatLng = $marker->get_coordinates();
-    } else if ($editing) {
-        $defaultLatLng = '52,19';
-    }
-    ?>
-    const defaultLatLng = [<?= $defaultLatLng; ?>];
-    const map = L.map('marker-location-map').setView(defaultLatLng, 6);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-    const marker = L.marker(defaultLatLng);
-    let isMarkerAdded = false;
-    <?php if ($marker->get_coordinates()): ?>
-    marker.addTo(map);
-    isMarkerAdded = true;
-    <?php endif; ?>
-    <?php if ($editing): ?>
-    map.on('click', (event) => {
-        marker.setLatLng(event.latlng);
-        jQuery('#coordinates').val(event.latlng.lat + ',' + event.latlng.lng);
-
-        if (!isMarkerAdded) {
-            marker.addTo(map);
-            isMarkerAdded = true;
-        }
-    });
-    jQuery('#marker-get-location-button').on('click', function () {
-        if (navigator.geolocation) {
-            const $self = jQuery(this);
-            $self.toggleClass('disabled').text('Pobieram lokalizację...');
-            navigator.geolocation.getCurrentPosition(function (position) {
-                $self.toggleClass('disabled').text('Pobierz aktualną lokalizację');
-                const { latitude, longitude } = position.coords;
-                marker.setLatLng({
-                    lat: latitude,
-                    lng: longitude,
-                });
-                jQuery('#coordinates').val(latitude + ',' + longitude);
-                map.setView([latitude, longitude], 15);
-
-                if (!isMarkerAdded) {
-                    marker.addTo(map);
-                    isMarkerAdded = true;
-                }
-            }, null, {
-                enableHighAccuracy: true
-            });
-        } else {
-            jQuery(this).addClass('disabled').text('Twoja przeglądarka nie wspiera geolokalizacji.');
-        }
-    })
-    <?php endif; ?>
-</script>
+<?php
+include_once __DIR__ . '/marker-map.php';

@@ -70,7 +70,7 @@ class Pinezka_Ak
         if (defined('PLUGIN_NAME_VERSION')) {
             $this->version = PLUGIN_NAME_VERSION;
         } else {
-            $this->version = '1.1.0';
+            $this->version = '1.2.0';
         }
         $this->plugin_name = 'pinezka-ak';
 
@@ -151,6 +151,7 @@ class Pinezka_Ak
         $plugin_admin = new Pinezka_Ak_Admin($this->get_plugin_name(), $this->get_version());
         $this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_styles');
         $this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts');
+        $this->loader->add_action('admin_init', $plugin_admin, 'init_team_settings');
         $this->loader->add_action('admin_menu', $plugin_admin, 'get_menu');
         $this->loader->add_action('edit_user_profile', $plugin_admin, 'usermeta_form_field_institution');
         $this->loader->add_action('edit_user_profile_update', $plugin_admin, 'usermeta_form_field_institution_update');

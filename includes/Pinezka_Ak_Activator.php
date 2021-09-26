@@ -49,7 +49,9 @@ CREATE TABLE IF NOT EXISTS `pinezka_ak_markers` (
     type VARCHAR(30),
     city VARCHAR(255),
     region VARCHAR(255),
-    image VARCHAR(30)
+    image VARCHAR(30),
+    points INT(10),
+    points_criteria VARCHAR(255)
 ) $charset_collate;\n");
     }
 }

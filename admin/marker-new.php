@@ -39,133 +39,18 @@
         $new_marker_region = $creating && isset($_POST['region']) ? wp_unslash($_POST['region']) : '';
         ?>
         <table class="form-table" role="presentation">
-            <tr class="form-field form-required">
-                <th scope="row">
-                    <label for="name">
-                        <?= __('Name'); ?>
-                        <span class="description"><?= __('(required)'); ?></span>
-                    </label>
-                </th>
-                <td>
-                    <input name="name" type="text" id="name" value="<?= esc_attr($new_marker_name); ?>"
-                           aria-required="true" maxlength="255" />
-                </td>
-            </tr>
-            <tr class="form-field">
-                <th scope="row">
-                    <label for="description">
-                        <?= __('Description'); ?>
-                    </label>
-                </th>
-                <td>
-                    <textarea class="textarea-wrap" name="description" id="description" rows="10"
-                              maxlength="1000"><?= esc_attr($new_marker_description); ?></textarea>
-                </td>
-            </tr>
-            <tr class="form-field">
-                <th scope="row">
-                    <label for="coordinates">
-                        Miejsce pinezki
-                    </label>
-                </th>
-                <td>
-                    <div id="marker-location-map" style="height: 400px; width: 95%;"></div>
-                    <br />
-                    <a id="marker-get-location-button" class="button">Pobierz aktualną lokalizację</a>
-                    <input name="coordinates" type="hidden" id="coordinates" />
-                </td>
-            </tr>
-            <tr class="form-field">
-                <th scope="row">
-                    <label for="city">
-                        <?= __('City'); ?>
-                    </label>
-                </th>
-                <td>
-                    <input name="city" type="text" id="city" value="<?= esc_attr($new_marker_city); ?>"
-                           maxlength="255" />
-                </td>
-            </tr>
-            <tr class="form-field">
-                <th scope="row">
-                    <label for="region">
-                        Województwo
-                    </label>
-                </th>
-                <td>
-                    <input name="region" type="text" id="region" value="<?= esc_attr($new_marker_region); ?>"
-                           maxlength="255" />
-                </td>
-            </tr>
-            <tr class="form-field">
-                <th scope="row">
-                    <label for="type">
-                        Rodzaj
-                    </label>
-                </th>
-                <td>
-                    <select name="type" id="type">
-                        <option value="">--- Wybierz rodzaj pinezki ---</option>
-                        <option value="grave">Mogiła</option>
-                        <option value="statue">Pomnik</option>
-                        <option value="exterior_memorial">Tablica pamiątkowa na zewnątrz</option>
-                        <option value="interior_memorial">Tablica pamiątkowa wewnątrz</option>
-                        <option value="other">Inne</option>
-                    </select>
-                </td>
-            </tr>
-            <tr class="form-field">
-                <th scope="row">
-                    <label for="image">
-                        <?= __('Image'); ?>
-                    </label>
-                </th>
-                <td>
-                    <input name="marker-image" type="file" id="image" accept="image/png, image/jpeg" />
-                </td>
-            </tr>
+            <?php Pinezka_Ak_Marker::get_name_form_html($new_marker_name, true); ?>
+            <?php Pinezka_Ak_Marker::get_description_form_html($new_marker_description, true); ?>
+            <?php Pinezka_Ak_Marker::get_coordinates_form_html('', true); ?>
+            <?php Pinezka_Ak_Marker::get_city_form_html($new_marker_city, true); ?>
+            <?php Pinezka_Ak_Marker::get_region_form_html($new_marker_region, true); ?>
+            <?php Pinezka_Ak_Marker::get_type_form_html($new_marker_type, true); ?>
+            <?php Pinezka_Ak_Marker::get_image_form_html('', true); ?>
+            <?php Pinezka_Ak_Marker::get_agreement_form_html(); ?>
         </table>
         <?php submit_button('Dodaj nową pinezkę', 'primary', 'createmarker', true, ['id' => 'createmarkersub']); ?>
     </form>
 </div>
-<script>
-    const defaultLatLng = [52, 19];
-    const map = L.map('marker-location-map').setView(defaultLatLng, 6);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-    const marker = L.marker(defaultLatLng);
-    let isMarkerAdded = false;
-    map.on('click', (event) => {
-        marker.setLatLng(event.latlng);
-        jQuery('#coordinates').val(event.latlng.lat + ',' + event.latlng.lng);
-
-        if (!isMarkerAdded) {
-            marker.addTo(map);
-            isMarkerAdded = true;
-        }
-    });
-    jQuery('#marker-get-location-button').on('click', function () {
-        if (navigator.geolocation) {
-            const $self = jQuery(this);
-            $self.toggleClass('disabled').text('Pobieram lokalizację...');
-            navigator.geolocation.getCurrentPosition(function (position) {
-                $self.toggleClass('disabled').text('Pobierz aktualną lokalizację');
-                const { latitude, longitude } = position.coords;
-                marker.setLatLng({
-                    lat: latitude,
-                    lng: longitude,
-                });
-                jQuery('#coordinates').val(latitude + ',' + longitude);
-                map.setView([latitude, longitude], 15);
-
-                if (!isMarkerAdded) {
-                    marker.addTo(map);
-                    isMarkerAdded = true;
-                }
-            }, null, {
-                enableHighAccuracy: true
-            });
-        } else {
-            jQuery(this).addClass('disabled').text('Twoja przeglądarka nie wspiera geolokalizacji.');
-        }
-    })
-</script>
+<?php
+$editing = true;
+include_once __DIR__ . '/marker-map.php';
